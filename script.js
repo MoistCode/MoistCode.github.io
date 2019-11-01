@@ -31,9 +31,10 @@ if (validHashes.indexOf(urlHash) > -1) {
   stateManagement.innerText = urlHash;
 }
 
-// Changes the links in dev environment for testing purposes
+// Obtains all of the "go-to" links
 const listOfLinks = $('[data-link-type="go-to"]');
 
+// Attaches an event listener to all of the "go-to" links
 listOfLinks.each(function() {
   const link = $(this);
   const linkHash = link[0].hash;
@@ -44,7 +45,7 @@ listOfLinks.each(function() {
     if (stateManagement.innerText !== HOME) {
       await $.get(readmeURL, renderMarkdown({ newState: HOME }));
     }
-    
+
     location.href = linkHash;
   });
 });
