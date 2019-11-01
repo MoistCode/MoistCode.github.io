@@ -14,7 +14,10 @@ const readmeURL = "./README.md";
 const tableRegex = /<!-- RENDER START -->([\S\s]*?)<!-- RENDER END -->/;
 
 // Uses the production URL to set the "is production" flag
-const isProd = window.location.href.indexOf("https://caffeine-overload.github.io/bandinchina") > -1;
+const isProd =
+  window.location.href.indexOf(
+    "https://caffeine-overload.github.io/bandinchina"
+  ) > -1;
 const validHashes = [BLACKLIST, WHITELIST];
 
 // Hash is used so sharing links using "/bandinchina#blacklist" will render the blacklist
@@ -90,7 +93,8 @@ function renderMarkdown(params = {}) {
     // this is meant to allow certain content to show up in the repo but not in the site
     // by setting the flags <!-- RENDER START --> and <!-- RENDER END -->
     const match = file.match(tableRegex);
-    const tableMD = match.length > 1 ? match[1] : "Table wasn't loaded properly 😬";
+    const tableMD =
+      match.length > 1 ? match[1] : "Table wasn't loaded properly 😬";
 
     // render the markdown into HTML
     const render = new showdown.Converter({ tables: true }).makeHtml(tableMD);
