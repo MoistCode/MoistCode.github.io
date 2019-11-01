@@ -32,20 +32,22 @@ if (validHashes.indexOf(urlHash) > -1) {
 }
 
 // Changes the links in dev environment for testing purposes
-if (!isProd) {
-  const listOfLinks = $('[data-link-type="go-to"]');
+const listOfLinks = $('[data-link-type="go-to"]');
 
-  listOfLinks.each(function() {
-    const link = $(this);
+listOfLinks.each(function() {
+  const link = $(this);
+  const linkHash = link[0].hash;
 
-    // Prevents re-rendering of the same "home" content
-    link.click(() => {
-      if (stateManagement.innerText !== HOME) {
-        $.get(readmeURL, renderMarkdown());
-      }
-    });
+  // Prevents re-rendering of the same "home" content
+  link.click(async () => {
+    // Async function is required here to wait for the markdown to render before setting the hash
+    if (stateManagement.innerText !== HOME) {
+      await $.get(readmeURL, renderMarkdown({ newState: HOME }));
+    }
+    
+    location.href = linkHash;
   });
-}
+});
 
 // Renders the content based on the state; mainly for sharing link wanting to render specific content
 switch (stateManagement.innerText) {
@@ -84,7 +86,7 @@ $("#home-nav").click(e => {
 });
 
 function renderMarkdown(params = {}) {
-  const { newState = HOME } = params;
+  const { newState = HOME, newHash = "" } = params;
 
   return function(file) {
     stateManagement.innerText = newState;
@@ -105,7 +107,9 @@ function renderMarkdown(params = {}) {
 
     if (initialRender) {
       initialRender = false;
-    } else {
+    }
+
+    if (newState !== HOME) {
       location.href = `#${newState}`;
     }
   };
