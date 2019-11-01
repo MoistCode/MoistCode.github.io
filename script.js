@@ -14,7 +14,10 @@ const readmeURL = "./README.md";
 const tableRegex = /<!-- RENDER START -->([\S\s]*?)<!-- RENDER END -->/;
 
 // Uses the production URL to set the "is production" flag
-const isProd = window.location.href.indexOf("https://caffeine-overload.github.io/bandinchina") > -1;
+const isProd =
+  window.location.href.indexOf(
+    "https://caffeine-overload.github.io/bandinchina"
+  ) > -1;
 const validHashes = [BLACKLIST, WHITELIST];
 
 // Hash is used so sharing links using "/bandinchina#blacklist" will render the blacklist
@@ -28,22 +31,25 @@ if (validHashes.indexOf(urlHash) > -1) {
   stateManagement.innerText = urlHash;
 }
 
-// Changes the links in dev environment for testing purposes
-if (!isProd) {
-  const listOfLinks = $('[data-link-type="go-to"]');
+// Obtains all of the "go-to" links
+const listOfLinks = $('[data-link-type="go-to"]');
 
-  listOfLinks.each(function() {
-    const link = $(this);
+// Attaches an event listener to all of the "go-to" links
+listOfLinks.each(function() {
+  const link = $(this);
+  const linkHash = link[0].hash;
 
-    // Prevents re-rendering of the same "home" content
-    link.click(() => {
-      if (stateManagement.innerText !== HOME) {
-        $.get(readmeURL, renderMarkdown());
-      }
-    });
+  // Prevents re-rendering of the same "home" content
+  link.click(async () => {
+    // Async function is required here to wait for the markdown to render before setting the hash
+    if (stateManagement.innerText !== HOME) {
+      await $.get(readmeURL, renderMarkdown({ newState: HOME }));
+    }
+
+    location.href = linkHash;
   });
-}
-console.log("cowman", stateManagement.innerText, urlHash);
+});
+
 // Renders the content based on the state; mainly for sharing link wanting to render specific content
 switch (stateManagement.innerText) {
   case BLACKLIST:
@@ -81,7 +87,7 @@ $("#home-nav").click(e => {
 });
 
 function renderMarkdown(params = {}) {
-  const { newState = HOME } = params;
+  const { newState = HOME, newHash = "" } = params;
 
   return function(file) {
     stateManagement.innerText = newState;
@@ -90,7 +96,8 @@ function renderMarkdown(params = {}) {
     // this is meant to allow certain content to show up in the repo but not in the site
     // by setting the flags <!-- RENDER START --> and <!-- RENDER END -->
     const match = file.match(tableRegex);
-    const tableMD = match.length > 1 ? match[1] : "Table wasn't loaded properly 😬";
+    const tableMD =
+      match.length > 1 ? match[1] : "Table wasn't loaded properly 😬";
 
     // render the markdown into HTML
     const render = new showdown.Converter({ tables: true }).makeHtml(tableMD);
@@ -101,7 +108,9 @@ function renderMarkdown(params = {}) {
 
     if (initialRender) {
       initialRender = false;
-    } else {
+    }
+
+    if (newState !== HOME) {
       location.href = `#${newState}`;
     }
   };
